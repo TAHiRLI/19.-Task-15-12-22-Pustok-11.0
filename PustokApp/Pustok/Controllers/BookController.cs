@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Pustok.Controllers
@@ -176,11 +178,9 @@ namespace Pustok.Controllers
             }
             else
             {
-                List<BasketCookieViewModel> basketCookieItems = null;
+                List<BasketCookieViewModel> basketCookieItems = new List<BasketCookieViewModel>();
                 var basket = HttpContext.Request.Cookies["basket"];
-                if(basket == null)
-                    basketCookieItems = new List<BasketCookieViewModel>();
-                else
+                if(basket != null)
                     basketCookieItems = JsonConvert.DeserializeObject<List<BasketCookieViewModel>>(basket);
 
                 var basketItem = basketCookieItems.FirstOrDefault(x => x.BookId == bookId);
@@ -220,6 +220,76 @@ namespace Pustok.Controllers
             return PartialView("_BasketPartial", BasketVm);
         }
 
+        public async Task<IActionResult> DeleteItem(int bookId)
+        {
+            
+            BasketViewModel BasketVm = new BasketViewModel();
+            if (User.Identity.IsAuthenticated)
+            {
+                var  user =await _userManager.FindByNameAsync(User.Identity.Name);
+                var existBasketItem =  _context.BasketItems.Where(x=> x.AppUserId == user.Id).FirstOrDefault(x => x.BookId == bookId);
+                if (existBasketItem == null)
+                    return NotFound();
+
+
+
+                _context.BasketItems.Remove(existBasketItem);
+                _context.SaveChanges();
+
+
+
+                var basketItems = _context.BasketItems
+                  .Include(x => x.Book)
+                  .ThenInclude(x => x.BookImages)
+                  .Where(x => x.AppUserId == user.Id)
+                  .ToList();
+
+                foreach (var item in basketItems)
+                {
+                    BasketItemViewModel basketItemVm = new BasketItemViewModel
+                    {
+                        Book = item.Book,
+                        Count = item.Count
+                    };
+                    BasketVm.Items.Add(basketItemVm);
+                    BasketVm.Total += item.Count * (item.Book.SalePrice * (100 - item.Book.DiscountPercent) / 100);
+
+                }
+
+            }
+            else
+            {
+                var basket =   HttpContext.Request.Cookies["basket"];
+                if (basket == null)
+                    return NotFound();
+
+                var basketList = JsonConvert.DeserializeObject<List<BasketCookieViewModel>>(basket);
+                var basketItem = basketList.FirstOrDefault(x => x.BookId == bookId);
+                if (basketItem == null)
+                    return NotFound();
+
+                basketList.Remove(basketItem);
+
+                HttpContext.Response.Cookies.Append("basket", JsonConvert.SerializeObject(basketList));
+
+                foreach (var item in basketList)
+                {
+                    Book book = _context.Books.Include(x=> x.BookImages).FirstOrDefault(x => x.Id == item.BookId);
+                    BasketItemViewModel basketItemVm = new BasketItemViewModel
+                    {
+                        Book = book,
+                        Count = item.Count
+                    };
+                    BasketVm.Items.Add(basketItemVm);
+                    BasketVm.Total += item.Count * (book.SalePrice * (100 - book.DiscountPercent) / 100);
+
+                }
+
+
+            }
+
+            return PartialView("_BasketPartial", BasketVm);
+        }
        
     }
 }

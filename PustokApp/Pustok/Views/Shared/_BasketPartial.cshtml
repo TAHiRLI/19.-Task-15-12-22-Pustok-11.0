@@ -29,7 +29,7 @@
                     </a>
                 </h3>
                     <p class="price"><span class="qty">@item.Count ×</span> £@((item.Book.SalePrice * (100 - item.Book.DiscountPercent) / 100).ToString("0.00"))</p>
-                <button class="cross-btn"><i class="fas fa-times"></i></button>
+                <a asp-action="deleteItem" asp-controller="book" asp-route-bookId="@item.Book.Id" class="removeItem cross-btn"><i class="fas fa-times"></i></a>
             </div>
         </div>
     </div>

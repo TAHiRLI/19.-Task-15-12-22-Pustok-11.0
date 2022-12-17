@@ -37,6 +37,13 @@ $(document).on("click", ".add-to-basket", function (e) {
             return response.text();
         })
         .then(data => {
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: 'Added',
+                showConfirmButton: false,
+                timer: 1200
+            })
             $("#BasketPartialHolder").html(data);
         })
         .catch(error=>{
@@ -44,4 +51,35 @@ $(document).on("click", ".add-to-basket", function (e) {
              })
 
     
+})
+
+$(document).on("click", ".removeItem", function (e) {
+    e.preventDefault();
+
+    let link = $(this).attr("href");
+
+    fetch(link)
+    .then(response => {
+        if (!response.ok) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'This product is out of stock',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            })
+            throw new Error("something went wrong");
+            return;
+        }
+        return response.text();
+    })
+        .then(data => {
+
+
+            console.log(data)
+            $("#BasketPartialHolder").html(data);
+        })
+        .catch(error => {
+            console.log(error)
+        })
+  
 })

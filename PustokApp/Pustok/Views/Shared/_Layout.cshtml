@@ -4,12 +4,13 @@
 @inject UserManager<AppUser> _userManager
 
 @{
-     AppUser user = null;
+    AppUser user = null;
     if(User.Identity.IsAuthenticated && User.IsInRole("Member")){
-      user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+        user = _userManager.FindByNameAsync(User.Identity.Name).Result;
     }
     Dictionary<string, string> Settings = layoutService.GetSettings();
     List<Genre> Genres = layoutService.GetGenres();
+    BasketViewModel basketVm = layoutService.GetBasket();
 }
 
 
@@ -249,7 +250,7 @@
 
                                     </div>
                                     <div class="cart-block" id="BasketPartialHolder">
-                                     @*@await Html.PartialAsync("_BasketPartial")   sending with javascript*@
+                                     @await Html.PartialAsync("_BasketPartial", basketVm );  
                                     </div>
                                 </div>
                             </div>

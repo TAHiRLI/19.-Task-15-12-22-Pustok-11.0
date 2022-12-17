@@ -1,0 +1,38 @@
+﻿@model BasketViewModel
+
+
+<div class="cart-total">
+    <span class="text-number">
+        @Model.Items.Count
+    </span>
+    <span class="text-item">
+        Shopping Cart
+    </span>
+    <span class="price">
+        £@Model.Total.ToString("0.00")
+        <i class="fas fa-chevron-down"></i>
+    </span>
+</div>
+<div class="cart-dropdown-block">
+
+    @foreach (var item in Model.Items)
+    {
+    <div class=" single-cart-block ">
+        <div class="cart-product">
+            <a asp-action="details" asp-controller="Book" asp-route-id="@item.Book.Id"  class="image">
+                <img src="~/Uploads/Books/@item.Book.BookImages.FirstOrDefault(x=> x.PosterStatus == true)?.Image" alt="">
+            </a>
+            <div class="content">
+                <h3 class="title">
+                        <a asp-action="details" asp-controller="Book" asp-route-id="@item.Book.Id">
+                       @item.Book.Name
+                    </a>
+                </h3>
+                    <p class="price"><span class="qty">@item.Count ×</span> £@((item.Book.SalePrice * (100 - item.Book.DiscountPercent) / 100).ToString("0.00"))</p>
+                <button class="cross-btn"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+    </div>
+        
+    }
+</div>

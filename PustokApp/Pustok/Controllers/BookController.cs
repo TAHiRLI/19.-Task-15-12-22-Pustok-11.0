@@ -77,6 +77,8 @@ namespace Pustok.Controllers
            .Include(x => x.BookTags)
            .ThenInclude(x => x.Tag)
            .FirstOrDefault(x => x.Id == reviewVm.BookId);
+            if (book == null)
+                return NotFound();
 
             if (!ModelState.IsValid)
             {

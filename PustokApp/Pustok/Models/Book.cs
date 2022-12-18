@@ -17,6 +17,7 @@ namespace Pustok.Models
         public int AuthorId { get; set; }
         public bool StockStatus { get; set; }
         public bool IsSpecial { get; set; }
+        public byte AvgRate { get; set; }
         public bool IsNew { get; set; }
 
         [Column(TypeName ="money")]
@@ -53,7 +54,7 @@ namespace Pustok.Models
         public Author Author { get; set; }
 
 
-        public List<Review> Reviews { get; set; }
+        public List<Review> Reviews { get; set; } = new List<Review>();
         public List<OrderItem> OrderItems { get; set; }
         public List<BookImage> BookImages { get; set; } = new List<BookImage>();
         public List<BookTag> BookTags { get; set; } = new List<BookTag>();

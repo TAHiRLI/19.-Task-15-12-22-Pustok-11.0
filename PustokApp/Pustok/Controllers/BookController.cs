@@ -65,20 +65,21 @@ namespace Pustok.Controllers
         public async Task<IActionResult> Review(ReviewCreateViewModel reviewVm)
         {
             // # deactivate if you want to enable a person to add multiple reviews
-            if (_context.Reviews.Include(x => x.AppUser).Any(x => x.BookId == reviewVm.BookId && x.AppUser.UserName == User.Identity.Name))
-                ModelState.AddModelError("", "You have already reviewed this product");
+           if (_context.Reviews.Include(x => x.AppUser).Any(x => x.BookId == reviewVm.BookId && x.AppUser.UserName == User.Identity.Name))
+              ModelState.AddModelError("", "You have already reviewed this product");
 
 
-
-            if (!ModelState.IsValid)
-            {
-                Book book = _context.Books
+            Book book = _context.Books
            .Include(x => x.Author)
            .Include(x => x.BookImages)
            .Include(x => x.Genre)
+           .Include(x=> x.Reviews).ThenInclude(x=> x.AppUser)
            .Include(x => x.BookTags)
            .ThenInclude(x => x.Tag)
            .FirstOrDefault(x => x.Id == reviewVm.BookId);
+
+            if (!ModelState.IsValid)
+            {
 
                 BookDetailViewModel detailVm = new BookDetailViewModel
                 {
@@ -101,7 +102,7 @@ namespace Pustok.Controllers
             Review review = new Review
             {
                 AppUser = await _userManager.FindByNameAsync(User.Identity.Name),
-                BookId = reviewVm.BookId,
+              //  BookId = reviewVm.BookId,
                 Rate = reviewVm.Rate,
                 Text = reviewVm.Text,
                 CreatedAt = DateTime.UtcNow.AddHours(4),
@@ -111,7 +112,8 @@ namespace Pustok.Controllers
 
 
 
-            _context.Reviews.Add(review);
+            book.Reviews.Add(review);
+            book.AvgRate = (byte)Math.Ceiling( book.Reviews.Average(x => x.Rate));
             _context.SaveChanges();
 
 

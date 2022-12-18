@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Pustok.DAL;
 using Pustok.Models;
 using Pustok.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -52,7 +53,7 @@ namespace Pustok.Sevices
                         Count = item.Count,
                     };
                     basketVm.Items.Add(basketItemVm);
-                    basketVm.Total = item.Count * (item.Book.SalePrice * (100 - item.Book.DiscountPercent)/ 100);
+                    basketVm.Total += item.Count * (item.Book.SalePrice * (100 - item.Book.DiscountPercent)/ 100);
                 }
             }
             else
@@ -63,10 +64,10 @@ namespace Pustok.Sevices
                 var basketStr = _httpAccessor.HttpContext.Request.Cookies["basket"];
                 if (basketStr != null)
                     basketList = JsonConvert.DeserializeObject<List<BasketCookieViewModel>>(basketStr);
-                else
-                {
-                    _httpAccessor.HttpContext.Response.Cookies.Append("basket", JsonConvert.SerializeObject(basketList));
-                }
+                //else
+                //{
+                //    _httpAccessor.HttpContext.Response.Cookies.Append("basketim", JsonConvert.SerializeObject(basketList));
+                //}
                 foreach (var item in basketList)
                 {
 
@@ -83,7 +84,7 @@ namespace Pustok.Sevices
 
 
             }
-            return basketVm;
+           return basketVm;
         }
     }
 }

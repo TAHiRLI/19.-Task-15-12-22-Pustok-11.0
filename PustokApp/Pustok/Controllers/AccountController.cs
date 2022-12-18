@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using NuGet.Protocol;
 using Pustok.DAL;
 using Pustok.Models;
 using Pustok.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +20,7 @@ namespace Pustok.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
 
-        public AccountController( PustokDbContext context, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public AccountController(PustokDbContext context, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
@@ -66,7 +68,7 @@ namespace Pustok.Controllers
                 return View();
             }
 
-              await _userManager.AddToRoleAsync(appUser, "Member");
+            await _userManager.AddToRoleAsync(appUser, "Member");
 
 
 
@@ -121,7 +123,39 @@ namespace Pustok.Controllers
             }
             if (returnUrl != null)
                 return Redirect(returnUrl);
+            // get basket cookies
+            var basketStr = HttpContext.Request.Cookies["basket"];
+            if (basketStr != null)
+            {
+                var basketList = JsonConvert.DeserializeObject<List<BasketCookieViewModel>>(basketStr);
 
+                foreach (var item in basketList)
+                {
+                    BasketItem basketItem = _context.BasketItems.FirstOrDefault(x=> x.AppUserId == appUser.Id && x.BookId == item.BookId);
+
+                    if (basketItem == null)
+                    {
+                        basketItem = new BasketItem
+                        {
+
+                            BookId = item.BookId,
+                            Count = item.Count,
+                            CreatedTime = DateTime.UtcNow.AddHours(4)
+
+                        };
+                        appUser.BasketItems.Add(basketItem);
+
+                    }
+                    else
+                    {
+                        basketItem.Count += item.Count;
+                    }
+
+
+                }
+            }
+
+            _context.SaveChanges();
 
             return RedirectToAction("Index", "Home");
         }
@@ -134,7 +168,7 @@ namespace Pustok.Controllers
         //    }
         //    return Content("User Is logged Out");
         //}
-        [Authorize(Roles ="Member")]
+        [Authorize(Roles = "Member")]
         public async Task<IActionResult> Profile()
         {
             AppUser appUser = await _userManager.FindByNameAsync(User.Identity.Name);

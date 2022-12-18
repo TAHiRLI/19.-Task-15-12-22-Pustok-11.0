@@ -3,10 +3,10 @@
 @{
     int totalRating = Model.Reviews.Sum(x => x.Rate);
     double reviewCount =(double)Model.Reviews.Count;
-    int avgRating =0;
-    if(reviewCount!= 0){
-        avgRating = (int)Math.Ceiling( totalRating / reviewCount);
-    }
+    //int avgRating =0;
+    //if(reviewCount!= 0){
+    //    avgRating = (int)Math.Ceiling( totalRating / reviewCount);
+    //}
 }
 
 <section class="breadcrumb-section">
@@ -105,7 +105,7 @@
 
                             @for (int i = 1; i <= 5; i++)
                             {
-                                <span class="fas fa-star @(i<=avgRating?"star_on":"") "></span>
+                                <span class="fas fa-star @(i<=Model.Book.AvgRate?"star_on":"") "></span>
                             }
                         </div>
                         <div class="review-widget">

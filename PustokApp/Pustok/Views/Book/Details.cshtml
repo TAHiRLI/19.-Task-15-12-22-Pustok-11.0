@@ -122,10 +122,10 @@
                     <div class="add-to-cart-row">
                         <div class="count-input-block">
                             <span class="widget-label">Qty</span>
-                            <input type="number" class="form-control text-center" value="1">
+                            <input type="number" class="form-control text-center " id="quantity" value="1">
                         </div>
-                        <div class="add-cart-btn">
-                            <a href="#" class="btn btn-outlined--primary">
+                        <div class="add-cart-btn ">
+                            <a asp-action="Addtobasket" asp-controller="book" asp-route-bookId="@Model.Book.Id" class="btn btn-outlined--primary add-basket-count">
                                 <span class="plus-icon">+</span>Add to
                                 Cart
                             </a>

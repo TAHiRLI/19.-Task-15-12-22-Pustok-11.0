@@ -83,3 +83,45 @@ $(document).on("click", ".removeItem", function (e) {
         })
   
 })
+
+
+
+
+
+
+$(document).on("click", ".add-basket-count", function (e) {
+    e.preventDefault();
+    let link = $(this).attr("href");
+    let quantity = document.getElementById("quantity").value;
+    link += `&count=${quantity}`;
+    console.log(link)
+    fetch(link)
+        .then(response => {
+            if (!response.ok) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'This product is out of stock',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                })
+                throw new Error("product out of stock");
+                return;
+            }
+            return response.text();
+        })
+        .then(data => {
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: 'Added',
+                showConfirmButton: false,
+                timer: 1200
+            })
+            $("#BasketPartialHolder").html(data);
+        })
+        .catch(error => {
+            console.log(error)
+        })
+
+
+})
